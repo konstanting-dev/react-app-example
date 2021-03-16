@@ -36,7 +36,7 @@ function Actions({ onDelete, id, className }: AccountsListActionsProps) {
         </IconButton>
       </Tooltip>
       <ConfirmationDialog title="Confirm Delete" open={open} onClose={handleClose} onAccept={handleDelete}>
-        Are you sure you want to delete this vehicle?
+        Are you sure you want to delete this member?
       </ConfirmationDialog>
     </TableCell>
   );

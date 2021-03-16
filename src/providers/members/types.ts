@@ -5,13 +5,13 @@ export interface Member {
   role: string;
 }
 
-export interface OnboardingContextType {
+export interface MembersContextType {
   members: Member[];
   addMember: (newMember: Member) => void;
   deleteMember: (id: string) => void;
   isLoading: boolean;
 }
 
-export interface OnboardingData {
+export interface MembersData {
   members: Member[];
 }

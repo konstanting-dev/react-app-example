@@ -1,4 +1,4 @@
-export interface VehicleTableItem {
+export interface MemberTableItem {
   id: string;
   name: string;
   email: string;
