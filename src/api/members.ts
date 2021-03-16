@@ -1,13 +1,15 @@
-import { Member } from 'src/providers/onboarding/types';
+import { Member } from 'src/providers/members/types';
 import { ID } from 'src/utils/string';
 
+const MEMBERS_STORAGE_KEY = 'members';
+
 export const getMembers = () => {
-  return Promise.resolve(JSON.parse(localStorage.getItem('members') || '[]') as Member[]);
+  return Promise.resolve(JSON.parse(localStorage.getItem(MEMBERS_STORAGE_KEY) || '[]') as Member[]);
 };
 
 export const addMemberRequest = (data: Partial<Member>) => {
   const id = ID();
-  const members = JSON.parse(localStorage.getItem('members') || '[]') as Member[];
+  const members = JSON.parse(localStorage.getItem(MEMBERS_STORAGE_KEY) || '[]') as Member[];
   const newMember = {
     id,
     name: '',
@@ -15,12 +17,12 @@ export const addMemberRequest = (data: Partial<Member>) => {
     role: '',
     ...data,
   };
-  localStorage.setItem('members', JSON.stringify([...members, newMember]));
+  localStorage.setItem(MEMBERS_STORAGE_KEY, JSON.stringify([...members, newMember]));
   return Promise.resolve(newMember);
 };
 
 export const deleteMemberRequest = (id: string) => {
-  const members = JSON.parse(localStorage.getItem('members') || '[]') as Member[];
+  const members = JSON.parse(localStorage.getItem(MEMBERS_STORAGE_KEY) || '[]') as Member[];
 
-  return Promise.resolve(localStorage.setItem('members', JSON.stringify(members.filter((m) => m.id !== id))));
+  return Promise.resolve(localStorage.setItem(MEMBERS_STORAGE_KEY, JSON.stringify(members.filter((m) => m.id !== id))));
 };

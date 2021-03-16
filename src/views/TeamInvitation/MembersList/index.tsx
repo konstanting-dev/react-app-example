@@ -2,19 +2,19 @@ import React, { useCallback, useMemo } from 'react';
 import { Column } from 'react-table';
 
 import { addMemberRequest } from 'src/api/members';
-import { useOnboardingData } from 'src/providers/onboarding';
+import { useMembersData } from 'src/providers/members';
+import { Member } from 'src/providers/members/types';
 import usePopup from 'src/utils/hooks/usePopup';
 import AddMemberModal from 'src/views/TeamInvitation/AddMemberForm';
 import { AddMemberFormData } from 'src/views/TeamInvitation/AddMemberForm/types';
-import { MemberTableItem } from 'src/views/TeamInvitation/MembersList/types';
 
 import MembersListView from './View';
 
 function MembersTableContainer() {
   const { handleClose, handleOpen, open } = usePopup();
-  const { members, addMember, isLoading } = useOnboardingData();
+  const { members, addMember, isLoading } = useMembersData();
 
-  const columns: Column<MemberTableItem>[] = useMemo(
+  const columns: Column<Member>[] = useMemo(
     () => [
       {
         Header: 'name',

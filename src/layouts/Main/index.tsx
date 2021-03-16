@@ -6,7 +6,6 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 
 import OnboardingStepper from 'src/layouts/Main/Stepper';
-import OnboardingProvider from 'src/providers/onboarding/provider';
 
 import TopBar from './TopBar';
 
@@ -34,14 +33,6 @@ interface DashboardProps extends RouteProps {
   route?: RouteConfig;
 }
 
-export function MainProvider(props: DashboardProps) {
-  return (
-    <OnboardingProvider>
-      <MainPage {...props} />
-    </OnboardingProvider>
-  );
-}
-
 function MainPage(props: DashboardProps) {
   const classes = useStyles();
 
@@ -59,4 +50,4 @@ function MainPage(props: DashboardProps) {
   );
 }
 
-export default MainProvider;
+export default MainPage;

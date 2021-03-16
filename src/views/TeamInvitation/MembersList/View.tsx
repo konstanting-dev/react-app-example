@@ -15,10 +15,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 
 import { deleteMemberRequest } from 'src/api/members';
-import { useOnboardingData } from 'src/providers/onboarding';
+import { useMembersData } from 'src/providers/members';
+import { Member } from 'src/providers/members/types';
 import Actions from 'src/views/TeamInvitation/MembersList/Actions';
-
-import { MemberTableItem } from './types';
 
 const useStyles = makeStyles((theme) => ({
   tableRoot: {
@@ -48,16 +47,16 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface MembersListViewProps {
-  columns: Array<Column<MemberTableItem>>;
-  data: MemberTableItem[];
+  columns: Array<Column<Member>>;
+  data: Member[];
   handleAddMemberClick: () => void;
   loading: boolean;
 }
 
 function MembersListView({ columns, data, handleAddMemberClick, loading }: MembersListViewProps) {
   const classes = useStyles();
-  const { deleteMember } = useOnboardingData();
-  const { getTableProps, headerGroups, prepareRow, rows } = useTable<MemberTableItem>(
+  const { deleteMember } = useMembersData();
+  const { getTableProps, headerGroups, prepareRow, rows } = useTable<Member>(
     {
       columns,
       data,

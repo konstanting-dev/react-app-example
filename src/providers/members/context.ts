@@ -1,8 +1,8 @@
 import { createContext } from 'react';
 
-import { Member, OnboardingContextType } from './types';
+import { Member, MembersContextType } from './types';
 
-export const defaultValue: OnboardingContextType = {
+export const defaultValue: MembersContextType = {
   members: [],
   addMember: (newMember: Member) => {
     if (process.env.NODE_ENV !== 'production') {
@@ -17,7 +17,7 @@ export const defaultValue: OnboardingContextType = {
   isLoading: false,
 };
 
-const OnboardingContext = createContext<OnboardingContextType>(defaultValue);
-OnboardingContext.displayName = 'OnboardingContext';
+const MembersContext = createContext<MembersContextType>(defaultValue);
+MembersContext.displayName = 'MembersContext';
 
-export default OnboardingContext;
+export default MembersContext;

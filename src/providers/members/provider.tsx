@@ -3,31 +3,31 @@ import { useQuery } from 'react-query';
 
 import { getMembers } from 'src/api/members';
 
-import OnboardingContext from './context';
-import { Member, OnboardingData } from './types';
+import MembersContext from './context';
+import { Member, MembersData } from './types';
 
-export function OnboardingProvider({ children }: PropsWithChildren<unknown>) {
+export function MembersProvider({ children }: PropsWithChildren<unknown>) {
   const { isLoading, data } = useQuery('members', getMembers);
-  const [onboardingData, setOnboardingData] = useState<OnboardingData>({
+  const [membersData, setMembersData] = useState<MembersData>({
     members: [],
   });
 
   useEffect(() => {
-    setOnboardingData((prev) => ({
+    setMembersData((prev) => ({
       ...prev,
       members: data || [],
     }));
   }, [data]);
 
   const handleAddMember = useCallback((newMember: Member) => {
-    setOnboardingData((prev) => ({
+    setMembersData((prev) => ({
       ...prev,
       members: [...prev.members, newMember],
     }));
   }, []);
 
   const handleDeleteMember = useCallback(async (id: string) => {
-    setOnboardingData((prev) => {
+    setMembersData((prev) => {
       return {
         ...prev,
         members: prev.members.filter((m) => m.id !== id),
@@ -36,13 +36,13 @@ export function OnboardingProvider({ children }: PropsWithChildren<unknown>) {
   }, []);
 
   const defaultContext = {
-    members: onboardingData.members,
+    members: membersData.members,
     addMember: handleAddMember,
     deleteMember: handleDeleteMember,
     isLoading,
   };
 
-  return <OnboardingContext.Provider value={defaultContext}>{children}</OnboardingContext.Provider>;
+  return <MembersContext.Provider value={defaultContext}>{children}</MembersContext.Provider>;
 }
 
-export default OnboardingProvider;
+export default MembersProvider;
