@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { useTable, useSortBy, Column } from 'react-table';
+import { useTable, useSortBy, Column, usePagination } from 'react-table';
 
 import {
   TableContainer,
@@ -9,6 +9,7 @@ import {
   TableCell,
   TableSortLabel,
   TableBody,
+  TablePagination,
 } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
@@ -67,12 +68,25 @@ function VehiclesListView({
 }: VehiclesListViewProps) {
   const classes = useStyles();
   const { deleteVehicle } = useVehiclesData();
-  const { getTableProps, headerGroups, prepareRow, rows } = useTable<Vehicle>(
+  const {
+    getTableProps,
+    headerGroups,
+    prepareRow,
+    gotoPage,
+    setPageSize,
+    state: { pageIndex, pageSize },
+    page,
+    rows,
+  } = useTable<Vehicle>(
     {
       columns,
       data,
+      initialState: {
+        pageSize: 10,
+      },
     },
     useSortBy,
+    usePagination,
   );
 
   const onDelete = useCallback(
@@ -81,6 +95,21 @@ function VehiclesListView({
       deleteVehicle(vin);
     },
     [deleteVehicle],
+  );
+
+  const handleChangePage = useCallback(
+    (event: unknown, newPage: number) => {
+      gotoPage(newPage);
+    },
+    [gotoPage],
+  );
+
+  const handleChangeRowsPerPage = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setPageSize(+event.target.value);
+      gotoPage(0);
+    },
+    [gotoPage, setPageSize],
   );
 
   return (
@@ -120,10 +149,10 @@ function VehiclesListView({
           <TableBody>
             {!rows.length && (
               <TableCell colSpan={9}>
-                <div className={classes.emptyList}>There are no members invited</div>
+                <div className={classes.emptyList}>There are no vehicles added or imported</div>
               </TableCell>
             )}
-            {rows.map((row, i) => {
+            {page.map((row, i) => {
               prepareRow(row);
 
               return (
@@ -144,6 +173,15 @@ function VehiclesListView({
           </TableBody>
         </MaUTable>
       </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[10, 25, 50, 100]}
+        component="div"
+        count={rows.length}
+        rowsPerPage={pageSize}
+        page={pageIndex}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+      />
     </>
   );
 }
