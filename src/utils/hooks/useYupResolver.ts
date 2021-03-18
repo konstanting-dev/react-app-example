@@ -2,6 +2,10 @@ import { useCallback } from 'react';
 
 import * as yup from 'yup';
 
+/** Hook gives ability to use Yup validation schema for react hook form
+ *
+ * @param validationSchema
+ */
 export const useYupValidationResolver = (validationSchema: yup.AnyObjectSchema) =>
   useCallback(
     async (data) => {

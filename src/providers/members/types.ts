@@ -5,6 +5,8 @@ export interface Member {
   role: string;
 }
 
+export type NewMember = Omit<Member, 'id'>;
+
 export interface MembersContextType {
   members: Member[];
   addMember: (newMember: Member) => void;

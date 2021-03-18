@@ -1,13 +1,18 @@
 import React, { PropsWithChildren, useCallback, useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 
-import { getMembers } from 'src/api/members';
+import { getVehicles } from 'src/api/vehicles';
 
-import OnboardingContext from './context';
+import VehiclesContext from './context';
 import { Vehicle, VehiclesData } from './types';
 
+/**
+ * Context provider for vehicles state and set state action methods
+ * @param children
+ * @constructor
+ */
 export function VehiclesProvider({ children }: PropsWithChildren<unknown>) {
-  const { isLoading, data } = useQuery('members', getMembers);
+  const { isLoading, data } = useQuery('vehicles', getVehicles);
   const [vehiclesData, setVehiclesData] = useState<VehiclesData>({
     vehicles: [],
   });
@@ -15,21 +20,14 @@ export function VehiclesProvider({ children }: PropsWithChildren<unknown>) {
   useEffect(() => {
     setVehiclesData((prev) => ({
       ...prev,
-      members: data || [],
+      vehicles: data || [],
     }));
   }, [data]);
 
-  const handleAddVehicle = useCallback((newVehicle: Vehicle) => {
+  const handleAddVehicle = useCallback((newVehicle: Vehicle | Vehicle[]) => {
     setVehiclesData((prev) => ({
       ...prev,
-      vehicles: [...prev.vehicles, newVehicle],
-    }));
-  }, []);
-
-  const handleAddVehicles = useCallback((newVehicles: Vehicle[]) => {
-    setVehiclesData((prev) => ({
-      ...prev,
-      vehicles: [...prev.vehicles, ...newVehicles],
+      vehicles: Array.isArray(newVehicle) ? [...prev.vehicles, ...newVehicle] : [...prev.vehicles, newVehicle],
     }));
   }, []);
 
@@ -45,12 +43,11 @@ export function VehiclesProvider({ children }: PropsWithChildren<unknown>) {
   const defaultContext = {
     vehicles: vehiclesData.vehicles,
     addVehicle: handleAddVehicle,
-    addVehicles: handleAddVehicles,
     deleteVehicle: handleDeleteVehicle,
     isLoading,
   };
 
-  return <OnboardingContext.Provider value={defaultContext}>{children}</OnboardingContext.Provider>;
+  return <VehiclesContext.Provider value={defaultContext}>{children}</VehiclesContext.Provider>;
 }
 
 export default VehiclesProvider;

@@ -6,7 +6,14 @@ import { getMembers } from 'src/api/members';
 import MembersContext from './context';
 import { Member, MembersData } from './types';
 
+/**
+ * Context provider for members state and set state action methods
+ * @param children
+ * @constructor
+ */
 export function MembersProvider({ children }: PropsWithChildren<unknown>) {
+  // using useQuery hook to manage loading and error state for GET request
+  // and also it gives a caching functionality
   const { isLoading, data } = useQuery('members', getMembers);
   const [membersData, setMembersData] = useState<MembersData>({
     members: [],

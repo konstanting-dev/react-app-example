@@ -1,7 +1,7 @@
-import React from 'react';
-import { RouteProps } from 'react-router';
+import React, { useEffect } from 'react';
+import { RouteProps, useHistory } from 'react-router';
 import { renderRoutes, RouteConfig } from 'react-router-config';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import Button from '@material-ui/core/Button';
 import Step from '@material-ui/core/Step';
@@ -46,22 +46,23 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-function getSteps() {
-  return [
-    {
-      label: 'Team Invitation',
-      path: '/invitation',
-    },
-    {
-      label: 'Import Vehicles',
-      path: '/import',
-    },
-    {
-      label: 'Service Package',
-      path: '/service',
-    },
-  ];
-}
+const steps = [
+  {
+    value: 0,
+    label: 'Team Invitation',
+    path: '/invitation',
+  },
+  {
+    value: 1,
+    label: 'Import Vehicles',
+    path: '/import',
+  },
+  {
+    value: 2,
+    label: 'Service Package',
+    path: '/service',
+  },
+];
 
 function getStepContent(step: number) {
   switch (step) {
@@ -82,12 +83,20 @@ interface OnboardingStepperProps extends RouteProps {
 
 export default function OnboardingStepper({ route }: OnboardingStepperProps) {
   const classes = useStyles();
-  const [activeStep, setActiveStep] = React.useState(0);
+  const { pathname } = useLocation();
+  const { push } = useHistory();
+  const [activeStep, setActiveStep] = React.useState(steps.find((step) => step.path === pathname)?.value || 0);
   const [completed, setCompleted] = React.useState(new Set<number>());
-  const steps = getSteps();
+
+  useEffect(() => {
+    const newRoute = steps.find((step) => step.value === activeStep)?.path;
+    if (newRoute) {
+      push(newRoute);
+    }
+  }, [activeStep, pathname, push]);
 
   const totalSteps = () => {
-    return getSteps().length;
+    return steps.length;
   };
 
   const completedSteps = () => {
@@ -109,8 +118,12 @@ export default function OnboardingStepper({ route }: OnboardingStepperProps) {
           // find the first step that has been completed
           steps.findIndex((step, i) => !completed.has(i))
         : activeStep + 1;
-
-    setActiveStep(newActiveStep);
+    if (completed.size !== totalSteps()) {
+      handleComplete();
+    }
+    if (!isLastStep()) {
+      setActiveStep(newActiveStep);
+    }
   };
 
   const handleBack = () => {
@@ -118,7 +131,6 @@ export default function OnboardingStepper({ route }: OnboardingStepperProps) {
   };
 
   const handleStep = (step: number) => () => {
-    handleComplete();
     setActiveStep(step);
   };
 
@@ -126,10 +138,6 @@ export default function OnboardingStepper({ route }: OnboardingStepperProps) {
     const newCompleted = new Set(completed);
     newCompleted.add(activeStep);
     setCompleted(newCompleted);
-
-    if (completed.size !== totalSteps()) {
-      handleNext();
-    }
   };
 
   function isStepComplete(step: number) {

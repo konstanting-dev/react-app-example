@@ -6,6 +6,9 @@ export interface PopupContextType {
   open: boolean;
 }
 
+/** Useful hook for different kinds of popups: dialogs, modals, tooltips, snackbars
+ Shares popup's open state and open/close methods
+ */
 export default function usePopup(): PopupContextType {
   const [open, setOpen] = useState(false);
 
