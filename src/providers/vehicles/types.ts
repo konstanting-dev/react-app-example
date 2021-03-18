@@ -30,8 +30,7 @@ export interface Vehicle {
 
 export interface VehiclesContextType {
   vehicles: Vehicle[];
-  addVehicle: (newVehicle: Vehicle) => void;
-  addVehicles: (newVehicles: Vehicle[]) => void;
+  addVehicle: (newVehicle: Vehicle | Vehicle[]) => void;
   deleteVehicle: (vin: string) => void;
   isLoading: boolean;
 }

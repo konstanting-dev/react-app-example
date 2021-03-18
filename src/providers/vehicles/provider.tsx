@@ -6,6 +6,11 @@ import { getVehicles } from 'src/api/vehicles';
 import VehiclesContext from './context';
 import { Vehicle, VehiclesData } from './types';
 
+/**
+ * Context provider for vehicles state and set state action methods
+ * @param children
+ * @constructor
+ */
 export function VehiclesProvider({ children }: PropsWithChildren<unknown>) {
   const { isLoading, data } = useQuery('vehicles', getVehicles);
   const [vehiclesData, setVehiclesData] = useState<VehiclesData>({
@@ -19,17 +24,10 @@ export function VehiclesProvider({ children }: PropsWithChildren<unknown>) {
     }));
   }, [data]);
 
-  const handleAddVehicle = useCallback((newVehicle: Vehicle) => {
+  const handleAddVehicle = useCallback((newVehicle: Vehicle | Vehicle[]) => {
     setVehiclesData((prev) => ({
       ...prev,
-      vehicles: [...prev.vehicles, newVehicle],
-    }));
-  }, []);
-
-  const handleAddVehicles = useCallback((newVehicles: Vehicle[]) => {
-    setVehiclesData((prev) => ({
-      ...prev,
-      vehicles: [...prev.vehicles, ...newVehicles],
+      vehicles: Array.isArray(newVehicle) ? [...prev.vehicles, ...newVehicle] : [...prev.vehicles, newVehicle],
     }));
   }, []);
 
@@ -45,7 +43,6 @@ export function VehiclesProvider({ children }: PropsWithChildren<unknown>) {
   const defaultContext = {
     vehicles: vehiclesData.vehicles,
     addVehicle: handleAddVehicle,
-    addVehicles: handleAddVehicles,
     deleteVehicle: handleDeleteVehicle,
     isLoading,
   };

@@ -12,7 +12,7 @@ import VehiclesListView from './View';
 
 function VehiclesTableContainer() {
   const { handleClose, handleOpen, open } = usePopup();
-  const { vehicles, addVehicle, addVehicles, isLoading } = useVehiclesData();
+  const { vehicles, addVehicle, isLoading } = useVehiclesData();
 
   const columns: Column<Vehicle>[] = useMemo(
     () => [
@@ -67,9 +67,9 @@ function VehiclesTableContainer() {
   const handleParse = useCallback(
     async (data: Vehicle[]) => {
       await addVehiclesBulkRequest(data);
-      addVehicles(data);
+      addVehicle(data);
     },
-    [addVehicles],
+    [addVehicle],
   );
 
   return (

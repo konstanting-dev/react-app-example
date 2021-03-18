@@ -118,8 +118,12 @@ export default function OnboardingStepper({ route }: OnboardingStepperProps) {
           // find the first step that has been completed
           steps.findIndex((step, i) => !completed.has(i))
         : activeStep + 1;
-
-    setActiveStep(newActiveStep);
+    if (completed.size !== totalSteps()) {
+      handleComplete();
+    }
+    if (!isLastStep()) {
+      setActiveStep(newActiveStep);
+    }
   };
 
   const handleBack = () => {
@@ -127,7 +131,6 @@ export default function OnboardingStepper({ route }: OnboardingStepperProps) {
   };
 
   const handleStep = (step: number) => () => {
-    handleComplete();
     setActiveStep(step);
   };
 
@@ -135,10 +138,6 @@ export default function OnboardingStepper({ route }: OnboardingStepperProps) {
     const newCompleted = new Set(completed);
     newCompleted.add(activeStep);
     setCompleted(newCompleted);
-
-    if (completed.size !== totalSteps()) {
-      handleNext();
-    }
   };
 
   function isStepComplete(step: number) {

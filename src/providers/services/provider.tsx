@@ -6,6 +6,11 @@ import { getServices } from 'src/api/services';
 import ServicesContext from './context';
 import { Service, ServicesData } from './types';
 
+/**
+ * Context provider for services state and set state action methods
+ * @param children
+ * @constructor
+ */
 export function ServicesProvider({ children }: PropsWithChildren<unknown>) {
   const { isLoading, data } = useQuery('services', getServices);
   const [servicesData, setServicesData] = useState<ServicesData>({
