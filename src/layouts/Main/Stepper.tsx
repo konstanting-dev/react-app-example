@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
-import { RouteProps, useHistory } from 'react-router';
-import { renderRoutes, RouteConfig } from 'react-router-config';
-import { Link, useLocation } from 'react-router-dom';
+import React, { PropsWithChildren, useEffect } from 'react';
+import { useHistory } from 'react-router';
+import { useLocation } from 'react-router-dom';
 
 import Button from '@material-ui/core/Button';
 import Step from '@material-ui/core/Step';
@@ -64,24 +63,7 @@ const steps = [
   },
 ];
 
-function getStepContent(step: number) {
-  switch (step) {
-    case 0:
-      return 'Team Invitation';
-    case 1:
-      return 'Import Vehicles';
-    case 2:
-      return 'Service Package';
-    default:
-      return 'Unknown step';
-  }
-}
-
-interface OnboardingStepperProps extends RouteProps {
-  route?: RouteConfig;
-}
-
-export default function OnboardingStepper({ route }: OnboardingStepperProps) {
+export default function OnboardingStepper({ children }: PropsWithChildren<unknown>) {
   const classes = useStyles();
   const { pathname } = useLocation();
   const { push } = useHistory();
@@ -92,23 +74,21 @@ export default function OnboardingStepper({ route }: OnboardingStepperProps) {
     const newRoute = steps.find((step) => step.value === activeStep)?.path;
     if (newRoute) {
       push(newRoute);
+    } else {
+      push('/congratulations');
     }
   }, [activeStep, pathname, push]);
-
-  const totalSteps = () => {
-    return steps.length;
-  };
 
   const completedSteps = () => {
     return completed.size;
   };
 
   const allStepsCompleted = () => {
-    return completedSteps() === totalSteps();
+    return completedSteps() === steps.length;
   };
 
   const isLastStep = () => {
-    return activeStep === totalSteps() - 1;
+    return activeStep === steps.length - 1;
   };
 
   const handleNext = () => {
@@ -118,12 +98,10 @@ export default function OnboardingStepper({ route }: OnboardingStepperProps) {
           // find the first step that has been completed
           steps.findIndex((step, i) => !completed.has(i))
         : activeStep + 1;
-    if (completed.size !== totalSteps()) {
+    if (completed.size !== steps.length) {
       handleComplete();
     }
-    if (!isLastStep()) {
-      setActiveStep(newActiveStep);
-    }
+    setActiveStep(newActiveStep);
   };
 
   const handleBack = () => {
@@ -147,7 +125,7 @@ export default function OnboardingStepper({ route }: OnboardingStepperProps) {
   return (
     <div className={classes.root}>
       <Stepper className={classes.stepper} alternativeLabel nonLinear activeStep={activeStep}>
-        {steps.map(({ label, path }, index) => {
+        {steps.map(({ label }, index) => {
           const stepProps: { completed?: boolean } = {};
           const buttonProps: { optional?: React.ReactNode } = {};
 
@@ -157,8 +135,6 @@ export default function OnboardingStepper({ route }: OnboardingStepperProps) {
                 className={classes.stepButton}
                 onClick={handleStep(index)}
                 completed={isStepComplete(index)}
-                component={Link}
-                to={path}
                 {...buttonProps}
               >
                 {label}
@@ -168,7 +144,7 @@ export default function OnboardingStepper({ route }: OnboardingStepperProps) {
         })}
       </Stepper>
       <div className={classes.content}>
-        {route && renderRoutes(route.routes)}
+        {children}
         <div>
           <Button disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
             Back

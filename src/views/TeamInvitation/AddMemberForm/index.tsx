@@ -1,11 +1,31 @@
 import React, { useCallback } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-import { Modal, Card, CardHeader, CardContent, CardActions, Divider, Button, TextField } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import {
+  Modal,
+  Card,
+  CardHeader,
+  CardContent,
+  CardActions,
+  Divider,
+  Button,
+  TextField,
+  InputLabel,
+  Select,
+  MenuItem,
+  Checkbox,
+  ListItemText,
+  Input,
+  FormControl,
+  capitalize,
+  FormHelperText,
+} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import * as yup from 'yup';
 
+import LoadingButton from 'src/components/LoadingButton';
+import { MemberRole } from 'src/providers/members/types';
 import { useYupValidationResolver } from 'src/utils/hooks/useYupResolver';
 import { AddMemberFormData } from 'src/views/TeamInvitation/AddMemberForm/types';
 
@@ -16,21 +36,21 @@ const useStyles = makeStyles((theme) => ({
     left: '50%',
     transform: 'translate(-50%, -50%)',
     outline: 'none',
-    boxShadow: (theme as any).shadows[20],
+    boxShadow: theme.shadows[20],
     width: 700,
     maxHeight: '100%',
     overflowY: 'auto',
     maxWidth: '100%',
   },
   container: {
-    marginTop: (theme as any).spacing(3),
+    marginTop: theme.spacing(3),
     height: 200,
   },
   actions: {
     justifyContent: 'flex-end',
   },
   submitButton: {
-    marginTop: (theme as any).spacing(2),
+    marginTop: theme.spacing(2),
   },
   fieldGroup: {
     display: 'flex',
@@ -40,6 +60,14 @@ const useStyles = makeStyles((theme) => ({
     marginTop: 0,
     marginBottom: 0,
   },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 200,
+    maxWidth: 400,
+  },
+  okButton: {
+    width: 120,
+  },
 }));
 
 interface BaseModalProps {
@@ -47,36 +75,41 @@ interface BaseModalProps {
   onClose: () => void;
   onSubmit: (data: AddMemberFormData) => void;
   className?: string;
+  loading: boolean;
 }
 
 const AddMemberFormSchema = yup.object().shape({
   name: yup.string().required(),
   email: yup.string().required(),
-  role: yup.string().required(),
+  roles: yup.array().required(),
 });
 
-const memberRoles = ['fleet manager', 'operations manager', 'driver', 'administrator', 'sales'];
+const memberRoles = Object.values(MemberRole).map((value) => ({
+  value,
+  label: capitalize(value.toString().toLowerCase().replace('_', ' ')),
+}));
 
 const defaultValues = {
   name: '',
   email: '',
-  role: 'role1',
+  roles: [MemberRole.ADMIN],
 };
 
-function AddMemberModal({ open, onClose, className, onSubmit, ...rest }: BaseModalProps) {
+function AddMemberModal({ open, onClose, className, onSubmit, loading, ...rest }: BaseModalProps) {
   const classes = useStyles();
   const resolver = useYupValidationResolver(AddMemberFormSchema);
-  const { handleSubmit, control, errors } = useForm<AddMemberFormData>({
+  const { handleSubmit, control, errors, watch } = useForm<AddMemberFormData>({
     defaultValues,
     resolver,
   });
 
+  const watchRoles = watch('roles');
+
   const handleClick = useCallback(
     (data: AddMemberFormData) => {
       onSubmit(data);
-      onClose();
     },
-    [onClose, onSubmit],
+    [onSubmit],
   );
 
   if (!open) {
@@ -111,33 +144,39 @@ function AddMemberModal({ open, onClose, className, onSubmit, ...rest }: BaseMod
             error={Boolean(errors?.email)}
             helperText={errors?.email?.message}
           />
-          <div className={classes.fieldGroup}>
+          <FormControl className={classes.formControl}>
+            <InputLabel id="roles-label">Roles</InputLabel>
             <Controller
-              as={TextField}
               control={control}
-              className={classes.field}
-              fullWidth
-              label="Role"
-              margin="dense"
-              name="role"
-              select
-              SelectProps={{ native: true }}
-              variant="outlined"
-            >
-              {memberRoles.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </Controller>
-          </div>
+              as={
+                <Select>
+                  {memberRoles.map((role) => (
+                    <MenuItem key={role.value} value={role.value}>
+                      <Checkbox checked={watchRoles?.indexOf(role.value) > -1} />
+                      <ListItemText primary={role.label} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              }
+              name="roles"
+              labelId="roles-label"
+              id="roles"
+              multiple
+              renderValue={(selected: MemberRole[]) => selected.join(', ')}
+              error={Boolean(errors?.roles)}
+              input={<Input />}
+            />
+            {errors?.roles && (
+              <FormHelperText>{errors?.roles?.map((field) => field?.message)?.join(', ')}</FormHelperText>
+            )}
+          </FormControl>
         </CardContent>
         <Divider />
         <CardActions className={classes.actions}>
-          <Button onClick={onClose}>Dismiss</Button>
-          <Button color="primary" onClick={handleSubmit(handleClick)} variant="contained">
-            Confirm
-          </Button>
+          <Button onClick={onClose}>Cancel</Button>
+          <LoadingButton pending={loading} color="primary" onClick={handleSubmit(handleClick)} variant="contained">
+            Add
+          </LoadingButton>
         </CardActions>
       </Card>
     </Modal>

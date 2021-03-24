@@ -1,11 +1,16 @@
-export interface Member {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
+export enum MemberRole {
+  FLEET_MANAGER = 'FLEET_MANAGER',
+  OPS_MANAGER = 'OPS_MANAGER',
+  DRIVER = 'DRIVER',
+  ADMIN = 'ADMIN',
+  SALES = 'SALES',
 }
 
-export type NewMember = Omit<Member, 'id'>;
+export interface Member {
+  name: string;
+  email: string;
+  roles: MemberRole[];
+}
 
 export interface MembersContextType {
   members: Member[];

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useTable, useSortBy, Column } from 'react-table';
 
 import {
@@ -14,12 +14,13 @@ import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 
-import { deleteMemberRequest } from 'src/api/members';
+import LoadingIndicator from 'src/components/LoadingIndicator';
 import { useMembersData } from 'src/providers/members';
 import { Member } from 'src/providers/members/types';
-import Actions from 'src/views/TeamInvitation/MembersList/Actions';
 
-const useStyles = makeStyles((theme) => ({
+import Actions from './Actions';
+
+const useStyles = makeStyles(() => ({
   tableRoot: {
     background: '#fff',
   },
@@ -67,16 +68,9 @@ function MembersListView({ columns, data, handleAddMemberClick, loading }: Membe
     useSortBy,
   );
 
-  const onDelete = useCallback(
-    async (id: string) => {
-      await deleteMemberRequest(id);
-      deleteMember(id);
-    },
-    [deleteMember],
-  );
-
   return (
     <TableContainer classes={{ root: classes.tableContainerRoot }}>
+      {loading && <LoadingIndicator />}
       <div className={classes.actionBar}>
         <Button variant="contained" color="primary" onClick={handleAddMemberClick}>
           Add member
@@ -109,9 +103,11 @@ function MembersListView({ columns, data, handleAddMemberClick, loading }: Membe
         </TableHead>
         <TableBody>
           {!rows.length && (
-            <TableCell colSpan={3}>
-              <div className={classes.emptyList}>There are no members invited</div>
-            </TableCell>
+            <TableRow className={classes.row}>
+              <TableCell colSpan={3}>
+                <div className={classes.emptyList}>There are no members invited</div>
+              </TableCell>
+            </TableRow>
           )}
           {rows.map((row, i) => {
             prepareRow(row);
@@ -126,7 +122,7 @@ function MembersListView({ columns, data, handleAddMemberClick, loading }: Membe
                       </TableCell>
                     );
                   })}
-                  <Actions id={row.original.id} onDelete={onDelete} />
+                  <Actions id={row.original.email} onDelete={deleteMember} />
                 </TableRow>
               </React.Fragment>
             );

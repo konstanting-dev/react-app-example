@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import { VehiclesContextType, Vehicle } from './types';
+import { VehiclesContextType } from './types';
 
 export const defaultValue: VehiclesContextType = {
   vehicles: [],
@@ -9,7 +9,7 @@ export const defaultValue: VehiclesContextType = {
       console.error('Called addVehicle. Did you forget to provide a provider?');
     }
   },
-  deleteVehicle: (vin: string) => {
+  deleteVehicle: () => {
     if (process.env.NODE_ENV !== 'production') {
       console.error('Called deleteVehicle. Did you forget to provide a provider?');
     }

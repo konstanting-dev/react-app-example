@@ -8,6 +8,5 @@ export function parse<T>(file: File, callback: (data: T[]) => void) {
     chunk: (results) => {
       callback(results.data);
     },
-    chunkSize: 10,
   });
 }

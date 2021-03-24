@@ -8,10 +8,12 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Divider from '@material-ui/core/Divider';
 
+import LoadingButton from 'src/components/LoadingButton';
+
 interface AlertDialogProps extends DialogProps {
   title: string;
   onClose: () => void;
-  onAccept?: (...args: any[]) => void;
+  onAccept?: (...args: never[]) => void;
   actions?: React.ReactNode;
   loading?: boolean;
 }
@@ -65,15 +67,9 @@ export default function AlertDialog({
           <Button onClick={handleCancel} color="primary">
             Cancel
           </Button>
-          {loading ? (
-            <Button onClick={handleAccept} color="primary">
-              Ok
-            </Button>
-          ) : (
-            <Button onClick={handleAccept} color="primary">
-              Ok
-            </Button>
-          )}
+          <LoadingButton pending={loading} onClick={handleAccept} color="primary">
+            Ok
+          </LoadingButton>
         </DialogActions>
       )}
     </Dialog>

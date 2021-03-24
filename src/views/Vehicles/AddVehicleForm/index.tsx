@@ -2,13 +2,13 @@ import React, { useCallback } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { Button, Card, CardActions, CardContent, CardHeader, Divider, Modal, TextField } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import * as yup from 'yup';
 
+import LoadingButton from 'src/components/LoadingButton';
 import { FuelType, Transmission, Vehicle } from 'src/providers/vehicles/types';
 import { useYupValidationResolver } from 'src/utils/hooks/useYupResolver';
-import { AddMemberFormData } from 'src/views/TeamInvitation/AddMemberForm/types';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -17,21 +17,21 @@ const useStyles = makeStyles((theme) => ({
     left: '50%',
     transform: 'translate(-50%, -50%)',
     outline: 'none',
-    boxShadow: (theme as any).shadows[20],
+    boxShadow: theme.shadows[20],
     width: 700,
     maxHeight: '100%',
     overflowY: 'auto',
     maxWidth: '100%',
   },
   container: {
-    marginTop: (theme as any).spacing(3),
+    marginTop: theme.spacing(3),
     height: 200,
   },
   actions: {
     justifyContent: 'flex-end',
   },
   submitButton: {
-    marginTop: (theme as any).spacing(2),
+    marginTop: theme.spacing(2),
   },
   fieldGroup: {
     display: 'flex',
@@ -48,6 +48,7 @@ interface BaseModalProps {
   onClose: () => void;
   onSubmit: (data: Vehicle) => void;
   className?: string;
+  loading: boolean;
 }
 
 const AddVehicleFormSchema = yup.object().shape({
@@ -86,7 +87,7 @@ const defaultValues: Vehicle = {
   licensePlate: '',
 };
 
-function AddVehicleModal({ open, onClose, className, onSubmit, ...rest }: BaseModalProps) {
+function AddVehicleModal({ open, onClose, className, onSubmit, loading, ...rest }: BaseModalProps) {
   const classes = useStyles();
   const resolver = useYupValidationResolver(AddVehicleFormSchema);
   const { handleSubmit, control, errors } = useForm<Vehicle>({
@@ -97,9 +98,8 @@ function AddVehicleModal({ open, onClose, className, onSubmit, ...rest }: BaseMo
   const handleClick = useCallback(
     (data: Vehicle) => {
       onSubmit(data);
-      onClose();
     },
-    [onClose, onSubmit],
+    [onSubmit],
   );
 
   if (!open) {
@@ -235,10 +235,10 @@ function AddVehicleModal({ open, onClose, className, onSubmit, ...rest }: BaseMo
         </CardContent>
         <Divider />
         <CardActions className={classes.actions}>
-          <Button onClick={onClose}>Dismiss</Button>
-          <Button color="primary" onClick={handleSubmit(handleClick)} variant="contained">
-            Confirm
-          </Button>
+          <Button onClick={onClose}>Cancel</Button>
+          <LoadingButton pending={loading} color="primary" onClick={handleSubmit(handleClick)} variant="contained">
+            Add
+          </LoadingButton>
         </CardActions>
       </Card>
     </Modal>

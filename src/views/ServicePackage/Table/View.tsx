@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useTable, useSortBy, Column } from 'react-table';
 
 import {
@@ -14,12 +14,13 @@ import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 
-import { deleteServiceRequest } from 'src/api/services';
+import LoadingIndicator from 'src/components/LoadingIndicator';
 import { useServicesData } from 'src/providers/services';
 import { Service } from 'src/providers/services/types';
-import Actions from 'src/views/TeamInvitation/MembersList/Actions';
 
-const useStyles = makeStyles((theme) => ({
+import Actions from './Actions';
+
+const useStyles = makeStyles(() => ({
   tableRoot: {
     background: '#fff',
   },
@@ -67,16 +68,9 @@ function ServicesListView({ columns, data, handleAddServiceClick, loading }: Ser
     useSortBy,
   );
 
-  const onDelete = useCallback(
-    async (packageId: string) => {
-      await deleteServiceRequest(packageId);
-      deleteService(packageId);
-    },
-    [deleteService],
-  );
-
   return (
     <TableContainer classes={{ root: classes.tableContainerRoot }}>
+      {loading && <LoadingIndicator />}
       <div className={classes.actionBar}>
         <Button variant="contained" color="primary" onClick={handleAddServiceClick}>
           Add service
@@ -126,7 +120,7 @@ function ServicesListView({ columns, data, handleAddServiceClick, loading }: Ser
                       </TableCell>
                     );
                   })}
-                  <Actions id={row.original.packageId} onDelete={onDelete} />
+                  <Actions id={row.original.packageId} onDelete={deleteService} />
                 </TableRow>
               </React.Fragment>
             );

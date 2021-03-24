@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { RouteProps } from 'react-router';
-import { RouteConfig } from 'react-router-config';
+import { renderRoutes, RouteConfig } from 'react-router-config';
 
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { makeStyles, Theme } from '@material-ui/core/styles';
@@ -33,7 +33,7 @@ interface DashboardProps extends RouteProps {
   route?: RouteConfig;
 }
 
-function MainPage(props: DashboardProps) {
+function MainPage({ route }: DashboardProps) {
   const classes = useStyles();
 
   return (
@@ -42,7 +42,7 @@ function MainPage(props: DashboardProps) {
       <div className={classes.container}>
         <div className={classes.content}>
           <Suspense fallback={<LinearProgress />}>
-            <OnboardingStepper {...props} />
+            <OnboardingStepper>{route && renderRoutes(route.routes)}</OnboardingStepper>
           </Suspense>
         </div>
       </div>

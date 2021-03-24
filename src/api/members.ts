@@ -1,25 +1,30 @@
-import { Member, NewMember } from 'src/providers/members/types';
-import { ID } from 'src/utils/string';
+import { Member } from 'src/providers/members/types';
 
-const MEMBERS_STORAGE_KEY = 'members';
+import api from './apiService';
 
-export const getMembers = () => {
-  return Promise.resolve(JSON.parse(localStorage.getItem(MEMBERS_STORAGE_KEY) || '[]') as Member[]);
+/**
+ * Axios request to get all registered users request
+ * @returns { Promise<Member[]> } - Members array promise
+ */
+export const getMembers = async () => {
+  const { data } = await api.get<Member[]>('/users');
+  return data;
 };
 
-export const addMemberRequest = (data: NewMember) => {
-  const id = ID();
-  const members = JSON.parse(localStorage.getItem(MEMBERS_STORAGE_KEY) || '[]') as Member[];
-  const newMember = {
-    id,
-    ...data,
-  };
-  localStorage.setItem(MEMBERS_STORAGE_KEY, JSON.stringify([...members, newMember]));
-  return Promise.resolve(newMember);
+/**
+ * Axios request to create a new user request
+ * @param { Member } data
+ * @returns { Promise<AxiosResponse<any>> }
+ */
+export const addMemberRequest = (data: Member) => {
+  return api.post('/users', data);
 };
 
-export const deleteMemberRequest = (id: string) => {
-  const members = JSON.parse(localStorage.getItem(MEMBERS_STORAGE_KEY) || '[]') as Member[];
-
-  return Promise.resolve(localStorage.setItem(MEMBERS_STORAGE_KEY, JSON.stringify(members.filter((m) => m.id !== id))));
+/**
+ * Axios request to delete a user request
+ * @param {string} email
+ * @returns { Promise<AxiosResponse<any>> }
+ */
+export const deleteMemberRequest = (email: string) => {
+  return api.delete(`/users/${email}`);
 };

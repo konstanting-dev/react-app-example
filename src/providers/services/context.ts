@@ -9,7 +9,7 @@ export const defaultValue: ServicesContextType = {
       console.error('Called addService. Did you forget to provide a provider?');
     }
   },
-  deleteService: (id: string) => {
+  deleteService: () => {
     if (process.env.NODE_ENV !== 'production') {
       console.error('Called deleteService. Did you forget to provide a provider?');
     }

@@ -6,12 +6,13 @@ interface Period {
 }
 
 export interface AddServiceFormData {
+  packageId: string;
   packageName: string;
   description: string;
   pricePerMinute: number;
   pricePerKm: number;
   termsConditions: string;
   validityPeriods: Period[];
-  requiredUserClaims: { claim: string }[];
-  requiredBusinessClaims: { claim: string }[];
+  requiredUserClaims: string[];
+  requiredBusinessClaims: string[];
 }
