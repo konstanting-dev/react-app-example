@@ -1,15 +1,15 @@
 import { createContext } from 'react';
 
-import { Member, MembersContextType } from './types';
+import { MembersContextType } from './types';
 
 export const defaultValue: MembersContextType = {
   members: [],
-  addMember: (newMember: Member) => {
+  addMember: () => {
     if (process.env.NODE_ENV !== 'production') {
       console.error('Called addMember. Did you forget to provide a provider?');
     }
   },
-  deleteMember: (id: string) => {
+  deleteMember: () => {
     if (process.env.NODE_ENV !== 'production') {
       console.error('Called deleteMember. Did you forget to provide a provider?');
     }

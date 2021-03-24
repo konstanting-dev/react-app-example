@@ -4,6 +4,8 @@ import React, { lazy } from 'react';
 import { RouteConfig, RouteConfigComponentProps } from 'react-router-config';
 import { Redirect, Route } from 'react-router-dom';
 
+import Congratulations from 'src/views/Congratulations';
+
 import ErrorLayout from './layouts/Error';
 import MainLayout from './layouts/Main';
 
@@ -12,6 +14,11 @@ export default [
     path: '/',
     exact: true,
     component: () => <Redirect to="/invitation" />,
+  },
+  {
+    path: '/congratulations',
+    exact: true,
+    component: () => <Route render={() => <Congratulations />} />,
   },
   {
     path: '/errors',

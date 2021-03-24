@@ -1,8 +1,10 @@
 import React, { memo, useCallback } from 'react';
+import { useMutation } from 'react-query';
 
 import { IconButton, TableCell, Tooltip } from '@material-ui/core';
 import { Delete as DeleteIcon } from '@material-ui/icons';
 
+import { deleteServiceRequest } from 'src/api/services';
 import ConfirmationDialog from 'src/components/ConfirmationDialog';
 import usePopup from 'src/utils/hooks/usePopup';
 
@@ -14,11 +16,14 @@ interface AccountsListActionsProps {
 
 function Actions({ onDelete, id, className }: AccountsListActionsProps) {
   const { handleOpen, handleClose, open } = usePopup();
+  const { isLoading: deleteServiceLoading, mutateAsync } = useMutation('deleteService', deleteServiceRequest);
 
   const handleDelete = useCallback(async () => {
+    await mutateAsync(id);
     onDelete(id);
     handleClose();
-  }, [handleClose, id, onDelete]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const handleDeleteClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -35,8 +40,14 @@ function Actions({ onDelete, id, className }: AccountsListActionsProps) {
           <DeleteIcon />
         </IconButton>
       </Tooltip>
-      <ConfirmationDialog title="Confirm Delete" open={open} onClose={handleClose} onAccept={handleDelete}>
-        Are you sure you want to delete this vehicle?
+      <ConfirmationDialog
+        title="Confirm Delete"
+        open={open}
+        onClose={handleClose}
+        onAccept={handleDelete}
+        loading={deleteServiceLoading}
+      >
+        Are you sure you want to delete this service?
       </ConfirmationDialog>
     </TableCell>
   );

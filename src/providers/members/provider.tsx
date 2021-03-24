@@ -33,11 +33,11 @@ export function MembersProvider({ children }: PropsWithChildren<unknown>) {
     }));
   }, []);
 
-  const handleDeleteMember = useCallback(async (id: string) => {
+  const handleDeleteMember = useCallback(async (email: string) => {
     setMembersData((prev) => {
       return {
         ...prev,
-        members: prev.members.filter((m) => m.id !== id),
+        members: prev.members.filter((m) => m.email !== email),
       };
     });
   }, []);

@@ -1,0 +1,851 @@
+openapi: 3.0.0
+info:
+  version: v1.0
+  title: MBP Backend APIs
+security:
+  - bearerAuth: []
+paths:
+  /api/v1/users:
+    get:
+      tags:
+        - User Management
+      summary: Get all registered users
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      tags:
+        - User Management
+      summary: Create a new user - sends an invitation code to the new user's email
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+        required: true
+      responses:
+        "201":
+          description: Created
+  /api/v1/users/{email}:
+    get:
+      tags:
+        - User Management
+      summary: Get data of one specific user
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    put:
+      tags:
+        - User Management
+      summary: Update user data
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+        required: true
+      responses:
+        "200":
+          description: OK
+    delete:
+      tags:
+        - User Management
+      summary: Delete user
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/users/confirmations:
+    post:
+      security: []
+      tags:
+        - User Management
+      summary: Confirm invitation and set initial password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserConfirmation"
+        required: true
+      responses:
+        "200":
+          description: OK
+  /api/v1/users/login:
+    post:
+      security: []
+      tags:
+        - User Management
+      summary: Login user, returns bearer token to be attached to auth header in authorized requests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLogin"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bearerToken:
+                    type: string
+  /api/v1/vehicles:
+    get:
+      tags:
+        - Vehicle Master Data
+      summary: Get the master data of all vehicles
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Vehicle"
+    post:
+      tags:
+        - Vehicle Master Data
+      summary: Add a new vehicle
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Vehicle"
+        required: true
+      responses:
+        "201":
+          description: Created
+  /api/v1/vehicles/import:
+    post:
+      tags:
+        - Vehicle Master Data
+      summary: Add a list of new vehicles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Vehicle"
+        required: true
+      responses:
+        "201":
+          description: Created
+  "/api/v1/vehicles/{vin}":
+    get:
+      tags:
+        - Vehicle Master Data
+      summary: Get the master data of a single vehicle identified by VIN
+      parameters:
+        - name: vin
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vehicle"
+    delete:
+      tags:
+        - Vehicle Master Data
+      summary: Delete a vehicle identified by VIN
+      parameters:
+        - name: vin
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Vehicle Master Data
+      summary: Update the master data of an existing vehicle identified by VIN
+      parameters:
+        - name: vin
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Vehicle"
+        description: The VIN attribute must either be absent in the input or have the same
+          value as in the path
+        required: true
+      responses:
+        "200":
+          description: OK
+  "/api/v1/vehicles/{vin}/telematics-data":
+    post:
+      tags:
+        - Vehicle Status Data
+      summary: Adds a new telematics data record for the vehicle identified by VIN
+      parameters:
+        - name: vin
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TelematicsRecord"
+        required: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Vehicle Status Data
+      summary: Gets telematics data records for the vehicle identified by VIN according
+        to the time period given
+      parameters:
+        - name: vin
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: query
+          description: Timestamp (UTC seconds) that marks the start of the time period for
+            that the data records are retrieved.
+          schema:
+            type: integer
+            format: int64
+        - name: to
+          in: query
+          description: Timestamp (UTC seconds) that marks the end of the time period for
+            that the data records are retrieved.
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: the list of telematics data records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TelematicsRecord"
+  "/api/v1/vehicles/{vin}/book/{servicePackageId}":
+    post:
+      tags:
+        - Vehicle Status Data
+      summary: Marks a vehicle as booked
+      description: Technically sets the vehicle's "bookedSince" property to the current
+        timestamp and the "bookedPackage" property to the id of the service
+        package booked.
+      parameters:
+        - name: vin
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: servicePackageId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+        "409":
+          description: Conflict error returned if the vehicle is already booked
+  "/api/v1/vehicles/{vin}/release":
+    post:
+      tags:
+        - Vehicle Status Data
+      summary: Marks a vehicle as no longer booked, returns the usage data and
+        calculated price
+      description: Technically resets the vehicle's property "bookedSince" to 0, determines
+        the trip data from the telematics records, calculates the final price,
+        and returns the trip data with the price.
+      parameters:
+        - name: vin
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RentalStatus"
+        "409":
+          description: Conflict error returned if the vehicle is not in status booked
+  "/api/v1/vehicles/{vin}/status":
+    get:
+      tags:
+        - Vehicle Status Data
+      summary: Gets the vehicle's current status data
+      parameters:
+        - name: vin
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VehicleStatus"
+  /api/v1/service-packages:
+    get:
+      tags:
+        - Service Packages
+      summary: Get the list of all service packages
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ServicePackage"
+    post:
+      tags:
+        - Service Packages
+      summary: Add a new service package
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServicePackage"
+        required: true
+      responses:
+        "201":
+          description: Created
+  "/api/v1/service-packages/{packageId}":
+    get:
+      tags:
+        - Service Packages
+      summary: Get the data of a single service package identified by package id
+      parameters:
+        - name: packageId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServicePackage"
+    delete:
+      tags:
+        - Service Packages
+      summary: Delete a service package identified by package id
+      parameters:
+        - name: packageId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Service Packages
+      summary: Update the data of an existing service package identified by package id
+      parameters:
+        - name: packageId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServicePackage"
+        description: The packageId attribute must either be absent in the input or have the
+          same value as in the path
+        required: true
+      responses:
+        "200":
+          description: OK
+  "/api/v1/vehicles/{vin}/services":
+    post:
+      tags:
+        - Service Catalog
+      summary: Associate one or more service packages to the vehicle
+      parameters:
+        - name: vin
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+        description: the list of package ids of the service packages that should be
+          associated to this vehicle
+        required: true
+      responses:
+        "201":
+          description: Service package mappings successfully created
+        "404":
+          description: vin or one of the service packages were not found
+        "409":
+          description: Vehicle is already associated to one or more of the service packages
+    get:
+      tags:
+        - Service Catalog
+      summary: Get the service packages associated to the vehicle
+      parameters:
+        - name: vin
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of service packages that are associated to the vehicle
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ServicePackage"
+  "/api/v1/vehicles/{vin}/services/{packageId}":
+    delete:
+      tags:
+        - Service Catalog
+      summary: Remove the association between the service package and the vehicle
+      parameters:
+        - name: vin
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: packageId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: vin or service package were not found, or service package is not
+            associated to the vehicle
+  /api/v1/service-catalog:
+    get:
+      tags:
+        - Service Catalog
+      summary: Get the list of all available services
+      description: Technically the service catalog is the list of available vehicles (i.e.
+        vehicles currently not booked) that have at least one service package
+        associated.
+      parameters:
+        - name: filter
+          in: query
+          description: Optional filter expression to limit the result based on defined
+            criteria (supported filter expressions TBD)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of services (combination of available vehicle and service
+            packages)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ServiceCatalogEntry"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+          description: email address is used as unique identifier and login name
+        name:
+          type: string
+          description: full name of the user
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [
+                "FLEET_MANAGER",
+                "OPS_MANAGER",
+                "DRIVER",
+                "ADMIN",
+                "SALES"
+            ]
+      required:
+        - email
+        - name
+        - roles
+      example:
+        email: admin@service-provider.com
+        name: Alice Admin
+        roles: [ "ADMIN" ]
+    UserConfirmation:
+      type: object
+      properties:
+        email:
+          type: string
+          description: the email address of the user to be confirmed
+        inviteCode:
+          type: string
+          description: the invitation code for the confirmation
+        password:
+          type: string
+          description: the initial password to be set for the confirmed user
+      required:
+        - email
+        - inviteCode
+        - password
+      example:
+        email: driver1@service-provider.com
+        inviteCode: "Lp9w8Kd#5><fH~32"
+        password: Start1234!
+    UserLogin:
+      type: object
+      properties:
+        email:
+          type: string
+          description: the email address of the user to be logged in
+        password:
+          type: string
+          description: the  password of the user to be logged in
+      required:
+        - email
+        - password
+      example:
+        email: driver1@service-provider.com
+        password: Start1234!
+    Vehicle:
+      type: object
+      properties:
+        vin:
+          type: string
+        brand:
+          type: string
+        model:
+          type: string
+        color:
+          type: string
+        fuelType:
+          type: string
+        numberOfDoors:
+          format: int32
+          type: integer
+        numberOfSeats:
+          format: int32
+          type: integer
+        transmission:
+          type: string
+        licensePlate:
+          type: string
+        imageUrl:
+          type: string
+      example:
+        vin: WDD2383481F014670
+        brand: Mercedes-Benz
+        model: E 300 d Sedan
+        color: Obsidian Black
+        fuelType: Diesel
+        numberOfDoors: 4
+        numberOfSeats: 5
+        transmission: Automatic
+        licensePlate: S-EC 300
+        imageUrl: https://srs-bbd.i.daimler.com/bbd-images/3549/8/cc/49503d81185137311dabaa0d81e4a93331f24.png
+    VehicleStatus:
+      type: object
+      properties:
+        vin:
+          type: string
+        bookedSince:
+          format: int64
+          type: integer
+          description: Timestamp (UTC seconds) since when the vehicle is booked, not set or
+            0 if currently not booked
+        bookedPackage:
+          type: integer
+          description: Package Id of the service package currently booked for the vehicle,
+            not set if currently not booked
+        latestTelematicsData:
+          $ref: "#/components/schemas/TelematicsRecordData"
+      example:
+        vin: WDD2383481F014670
+        bookedSince: 0
+        latestTelematicsData:
+          timestamp: 1574003990
+          locLat: 48.74686
+          locLong: 9.30699
+          mileage: 2949.1
+          fuelLevel: 71.7
+          isDoorOpened: false
+    RentalStatus:
+      type: object
+      properties:
+        vin:
+          type: string
+        rentalStartTime:
+          format: int64
+          type: integer
+          description: Timestamp (UTC seconds) when the rent started
+        rentalStartMileage:
+          format: double
+          type: number
+          description: Mileage (in km) of the time when the rent started
+        rentalStartLocLat:
+          format: double
+          type: number
+          description: Latitude of the location where the rent started
+        rentalStartLocLong:
+          format: double
+          type: number
+          description: Longitude of the location where the rent started
+        rentalDuration:
+          format: double
+          type: number
+          description: Total duration of the rent in minutes
+        rentalMileage:
+          format: double
+          type: number
+          description: Total mileage of the rent in km
+        rentalEndTime:
+          format: int64
+          type: integer
+          description: Timestamp (UTC seconds) when the rent ended
+        rentalEndMileage:
+          format: double
+          type: number
+          description: Mileage (in km) of the time when the rent ended
+        rentalEndLocLat:
+          format: double
+          type: number
+          description: Latitude of the location where the rent ended
+        rentalEndLocLong:
+          format: double
+          type: number
+          description: Longitude of the location where the rent ended
+        finalPrice:
+          format: double
+          type: number
+          description: Final price of the rent in EUR
+        priceComment:
+          type: string
+          description: Optional comment related to the final price
+      example:
+        vin: WDD2383481F014670
+        rentalStartTime: 1574003890
+        rentalStartMileage: 29420.6
+        rentalStartLocLat: 48.74686
+        rentalStartLocLong: 9.3
+        rentalDuration: 24
+        rentalMileage: 14
+        rentalEndTime: 1574004890
+        rentalEndMileage: 29434.7
+        rentalEndLocLat: 48.75392
+        rentalEndLocLong: 9.302
+        finalPrice: 9.7
+    TelematicsRecord:
+      type: object
+      properties:
+        vin:
+          type: string
+        deviceId:
+          type: string
+          description: the unique identifier of the device that sent the telematics record
+        data:
+          $ref: "#/components/schemas/TelematicsRecordData"
+        deviceSignature:
+          type: string
+          format: byte
+          description: The signature for the above data signed with the private key of the
+            device that sent the telematics record
+      example:
+        vin: WDD2383481F014670
+        deviceId: "0x716c5647Cb4618Dd5ae231A6CacE3CBF574E19f8"
+        data:
+          timestamp: 1574003890
+          locLat: 48.74686
+          locLong: 9.30699
+          mileage: 2948.6
+          fuelLevel: 73.4
+          isDoorOpened: false
+        deviceSignature: MCwCFFdjwiNL4Vki8MlCWMsBZC5cPkb9AhRnpd3NBvTtzpAzb0RyQJPyT8EH6w==
+    TelematicsRecordData:
+      type: object
+      properties:
+        timestamp:
+          format: int64
+          type: integer
+          description: Timestamp (UTC seconds) that marks the time when the data entry was
+            recorded.
+        locLat:
+          format: double
+          type: number
+          description: Latitude of the current location of the vehicle
+        locLong:
+          format: double
+          type: number
+          description: Longitude of the current location of the vehicle
+        mileage:
+          format: double
+          type: number
+          description: The current mileage of the vehicle in kilometers
+        fuelLevel:
+          format: double
+          type: number
+          description: The current level of fuel or energy in percent
+        isDoorOpened:
+          type: boolean
+          description: The current status of the vehicle door (true = open, false = closed)
+      example:
+        timestamp: 1574003890
+        locLat: 48.74686
+        locLong: 9.30699
+        mileage: 2948.6
+        fuelLevel: 73.4
+        isDoorOpened: false
+    ServicePackage:
+      type: object
+      properties:
+        packageId:
+          type: integer
+          description: The unique id of the service package
+        packageName:
+          type: string
+          description: The name of the service package
+        description:
+          type: string
+          description: The description of the service package
+        pricePerMinute:
+          format: double
+          type: number
+          description: The price per minute in EUR
+        pricePerKm:
+          format: double
+          type: number
+          description: The price per kilometer in EUR
+        validityPeriods:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidityPeriod"
+          description: List of time frames when the service package is valid
+        termsConditions:
+          type: string
+          description: HTML representation of the full terms and conditions applicable for
+            this service package, may also be a link pointing to an external
+            HTML document
+        requiredUserClaims:
+          type: array
+          items:
+            type: string
+          description: List of required claims an end consumer has to fulfil in order to be
+            allowed to book this package, if not set this means the package can
+            not be booked by end consumers (B2B-only)
+        requiredBusinessClaims:
+          type: array
+          items:
+            type: string
+          description: List of required claims a business has to fulfil in order to be
+            allowed to book this package, if not set this means the package can
+            not be booked by businesses (B2C-only)
+      example:
+        packageId: 42
+        packageName: Upper mid-range vehicle standard
+        description: Standard minute based service package for upper mid-range vehicles
+        pricePerMinute: 0.4
+        validityPeriods:
+          - from: 1574003890
+            to: 1574013990
+        termsConditions: <p>Valid as of 10.07.2019</p><h2>§1 Subject</h2><p>matter(1) Fleet2Share...</p>
+        requiredUserClaims:
+          - minAge21
+          - driverLicense
+        requiredBusinessClaims:
+          - company
+    ValidityPeriod:
+      type: object
+      properties:
+        from:
+          format: int64
+          type: number
+          description: Timestamp (UTC seconds) that marks the beginning of the validity
+            period.
+        to:
+          format: int64
+          type: number
+          description: Timestamp (UTC seconds) that marks the end of the validity period.
+    ServiceCatalogEntry:
+      type: object
+      properties:
+        vehicleData:
+          $ref: "#/components/schemas/Vehicle"
+        vehicleStatus:
+          $ref: "#/components/schemas/VehicleStatus"
+        servicePackages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ServicePackage"

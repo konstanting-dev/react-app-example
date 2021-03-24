@@ -1,27 +1,38 @@
+import api from 'src/api/apiService';
 import { Vehicle } from 'src/providers/vehicles/types';
 
-const VEHICLES_STORAGE_KEY = 'vehicles';
-
-export const getVehicles = () => {
-  return Promise.resolve(JSON.parse(localStorage.getItem(VEHICLES_STORAGE_KEY) || '[]') as Vehicle[]);
+/**
+ * Axios request to get the master data of all vehicles
+ * @returns { Promise<Vehicle[]> } - Vehicle array promise
+ */
+export const getVehicles = async () => {
+  const { data } = await api.get<Vehicle[]>('/vehicles');
+  return data;
 };
 
+/**
+ * Axios request to add a new vehicle
+ * @param { Vehicle } data
+ * @returns { Promise<AxiosResponse<any>> }
+ */
 export const addVehicleRequest = (data: Vehicle) => {
-  const vehicles = JSON.parse(localStorage.getItem(VEHICLES_STORAGE_KEY) || '[]') as Vehicle[];
-  localStorage.setItem(VEHICLES_STORAGE_KEY, JSON.stringify([...vehicles, data]));
-  return Promise.resolve(data);
+  return api.post('/vehicles', data);
 };
 
+/**
+ * Axios request to bulk import new vehicles
+ * @param { Vehicle[] } data
+ * @returns { Promise<AxiosResponse<any>> }
+ */
 export const addVehiclesBulkRequest = (data: Vehicle[]) => {
-  const vehicles = JSON.parse(localStorage.getItem(VEHICLES_STORAGE_KEY) || '[]') as Vehicle[];
-  localStorage.setItem(VEHICLES_STORAGE_KEY, JSON.stringify([...vehicles, ...data]));
-  return Promise.resolve(data);
+  return api.post('/vehicles/import', data);
 };
 
+/**
+ * Axios request to delete a vehicle
+ * @param {string} vin
+ * @returns { Promise<AxiosResponse<any>> }
+ */
 export const deleteVehicleRequest = (vin: string) => {
-  const vehicles = JSON.parse(localStorage.getItem(VEHICLES_STORAGE_KEY) || '[]') as Vehicle[];
-
-  return Promise.resolve(
-    localStorage.setItem(VEHICLES_STORAGE_KEY, JSON.stringify(vehicles.filter((m) => m.vin !== vin))),
-  );
+  return api.delete(`/vehicles/${vin}`);
 };

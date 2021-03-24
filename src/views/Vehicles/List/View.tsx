@@ -11,17 +11,16 @@ import {
   TableBody,
   TablePagination,
 } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 
-import { deleteVehicleRequest } from 'src/api/vehicles';
+import LoadingIndicator from 'src/components/LoadingIndicator';
 import { useVehiclesData } from 'src/providers/vehicles';
 import { Vehicle } from 'src/providers/vehicles/types';
-import Actions from 'src/views/TeamInvitation/MembersList/Actions';
-import ImportCsvButton from 'src/views/Vehicles/ImportCsvButton';
 
-const useStyles = makeStyles((theme) => ({
+import Actions from './Actions';
+
+const useStyles = makeStyles(() => ({
   tableRoot: {
     background: '#fff',
   },
@@ -54,18 +53,10 @@ const useStyles = makeStyles((theme) => ({
 interface VehiclesListViewProps {
   columns: Array<Column<Vehicle>>;
   data: Vehicle[];
-  handleAddVehicleClick: () => void;
-  handleVehiclesParsing: (data: Vehicle[]) => void;
   loading: boolean;
 }
 
-function VehiclesListView({
-  columns,
-  data,
-  handleAddVehicleClick,
-  handleVehiclesParsing,
-  loading,
-}: VehiclesListViewProps) {
+function VehiclesListView({ columns, data, loading }: VehiclesListViewProps) {
   const classes = useStyles();
   const { deleteVehicle } = useVehiclesData();
   const {
@@ -89,14 +80,6 @@ function VehiclesListView({
     usePagination,
   );
 
-  const onDelete = useCallback(
-    async (vin: string) => {
-      await deleteVehicleRequest(vin);
-      deleteVehicle(vin);
-    },
-    [deleteVehicle],
-  );
-
   const handleChangePage = useCallback(
     (event: unknown, newPage: number) => {
       gotoPage(newPage);
@@ -114,13 +97,8 @@ function VehiclesListView({
 
   return (
     <>
-      <div className={classes.actionBar}>
-        <Button className={classes.addButton} variant="contained" color="primary" onClick={handleAddVehicleClick}>
-          Add vehicle
-        </Button>
-        <ImportCsvButton className={classes.addButton} onParse={handleVehiclesParsing} />
-      </div>
       <TableContainer classes={{ root: classes.tableContainerRoot }}>
+        {loading && <LoadingIndicator />}
         <MaUTable className={clsx(classes.tableRoot, { [classes.tableNotEmpty]: rows.length })} {...getTableProps()}>
           <TableHead>
             {headerGroups.map((headerGroup, index) => (
@@ -165,7 +143,7 @@ function VehiclesListView({
                         </TableCell>
                       );
                     })}
-                    <Actions id={row.original.vin} onDelete={onDelete} />
+                    <Actions id={row.original.vin} onDelete={deleteVehicle} />
                   </TableRow>
                 </React.Fragment>
               );

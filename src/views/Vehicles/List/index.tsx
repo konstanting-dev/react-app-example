@@ -1,18 +1,34 @@
 import React, { useCallback, useMemo } from 'react';
+import { useMutation } from 'react-query';
 import { Column } from 'react-table';
 
-import { addVehicleRequest, addVehiclesBulkRequest } from 'src/api/vehicles';
+import Button from '@material-ui/core/Button';
+import { makeStyles } from '@material-ui/core/styles';
+
+import { addVehicleRequest } from 'src/api/vehicles';
 import { useVehiclesData } from 'src/providers/vehicles';
 import { Vehicle } from 'src/providers/vehicles/types';
 import usePopup from 'src/utils/hooks/usePopup';
+import ImportCsvButton from 'src/views/Vehicles/ImportCsvButton';
 
 import AddVehicleForm from '../AddVehicleForm';
 
 import VehiclesListView from './View';
 
+const useStyles = makeStyles(() => ({
+  actionBar: {
+    margin: '0 -10px 20px',
+  },
+  addButton: {
+    margin: '0 10px',
+  },
+}));
+
 function VehiclesTableContainer() {
+  const classes = useStyles();
   const { handleClose, handleOpen, open } = usePopup();
   const { vehicles, addVehicle, isLoading } = useVehiclesData();
+  const { isLoading: addVehicleLoading, mutateAsync } = useMutation('addVehicle', addVehicleRequest);
 
   const columns: Column<Vehicle>[] = useMemo(
     () => [
@@ -58,30 +74,23 @@ function VehiclesTableContainer() {
 
   const handleSubmit = useCallback(
     async (data: Vehicle) => {
-      await addVehicleRequest(data);
+      await mutateAsync(data);
       addVehicle(data);
+      handleClose();
     },
-    [addVehicle],
-  );
-
-  const handleParse = useCallback(
-    async (data: Vehicle[]) => {
-      await addVehiclesBulkRequest(data);
-      addVehicle(data);
-    },
-    [addVehicle],
+    [addVehicle, handleClose, mutateAsync],
   );
 
   return (
     <>
-      <VehiclesListView
-        data={vehicles}
-        columns={columns}
-        handleAddVehicleClick={handleOpen}
-        handleVehiclesParsing={handleParse}
-        loading={isLoading}
-      />
-      <AddVehicleForm open={open} onClose={handleClose} onSubmit={handleSubmit} />
+      <div className={classes.actionBar}>
+        <Button className={classes.addButton} variant="contained" color="primary" onClick={handleOpen}>
+          Add vehicle
+        </Button>
+        <ImportCsvButton className={classes.addButton} />
+      </div>
+      <VehiclesListView data={vehicles} columns={columns} loading={isLoading} />
+      <AddVehicleForm open={open} onClose={handleClose} onSubmit={handleSubmit} loading={addVehicleLoading} />
     </>
   );
 }

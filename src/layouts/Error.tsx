@@ -20,7 +20,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 interface ErrorProps {
-  route: RouteConfig;
+  route?: RouteConfig;
 }
 
 function Error({ route }: ErrorProps) {
@@ -29,7 +29,7 @@ function Error({ route }: ErrorProps) {
   return (
     <div className={classes.root}>
       <div className={classes.content}>
-        <Suspense fallback={<LinearProgress />}>{renderRoutes(route.routes)}</Suspense>
+        <Suspense fallback={<LinearProgress />}>{renderRoutes(route?.routes)}</Suspense>
       </div>
     </div>
   );

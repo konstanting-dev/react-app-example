@@ -1,16 +1,33 @@
 import React, { useCallback } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-import { Button, Card, CardActions, CardContent, CardHeader, Divider, Modal, TextField } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import {
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  Checkbox,
+  Divider,
+  FormControl,
+  Input,
+  InputLabel,
+  MenuItem,
+  Modal,
+  Select,
+  TextField,
+  ListItemText,
+} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import * as yup from 'yup';
 
-import { NewService } from 'src/providers/services/types';
+import LoadingButton from 'src/components/LoadingButton';
+import { Service } from 'src/providers/services/types';
 import { useYupValidationResolver } from 'src/utils/hooks/useYupResolver';
-import Claims from 'src/views/ServicePackage/AddServiceForm/Claims';
-import { AddServiceFormData } from 'src/views/ServicePackage/AddServiceForm/types';
-import ValidityPeriods from 'src/views/ServicePackage/AddServiceForm/ValidityPeriods';
+
+import { AddServiceFormData } from './types';
+import ValidityPeriods from './ValidityPeriods';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,21 +36,21 @@ const useStyles = makeStyles((theme) => ({
     left: '50%',
     transform: 'translate(-50%, -50%)',
     outline: 'none',
-    boxShadow: (theme as any).shadows[20],
+    boxShadow: theme.shadows[20],
     width: 700,
     maxHeight: '100%',
     overflowY: 'auto',
     maxWidth: '100%',
   },
   container: {
-    marginTop: (theme as any).spacing(3),
+    marginTop: theme.spacing(3),
     height: 200,
   },
   actions: {
     justifyContent: 'flex-end',
   },
   submitButton: {
-    marginTop: (theme as any).spacing(2),
+    marginTop: theme.spacing(2),
   },
   fieldGroup: {
     display: 'flex',
@@ -60,16 +77,23 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
   },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 200,
+    maxWidth: 400,
+  },
 }));
 
 interface BaseModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: NewService) => void;
+  onSubmit: (data: Service) => void;
   className?: string;
+  loading: boolean;
 }
 
 const AddVehicleFormSchema = yup.object().shape({
+  packageId: yup.number().required(),
   packageName: yup.string().required(),
   description: yup.string().required(),
   pricePerMinute: yup.number().required(),
@@ -78,6 +102,7 @@ const AddVehicleFormSchema = yup.object().shape({
 });
 
 const defaultValues: AddServiceFormData = {
+  packageId: '',
   packageName: '',
   description: '',
   pricePerMinute: 0,
@@ -88,29 +113,32 @@ const defaultValues: AddServiceFormData = {
   requiredBusinessClaims: [],
 };
 
-function AddVehicleModal({ open, onClose, className, onSubmit, ...rest }: BaseModalProps) {
+const userClaims = ['minAge18', 'minAge21', 'minAge25', 'driverLicense'];
+const businessClaims = ['company'];
+
+function AddVehicleModal({ open, onClose, className, onSubmit, loading, ...rest }: BaseModalProps) {
   const classes = useStyles();
   const resolver = useYupValidationResolver(AddVehicleFormSchema);
-  const { handleSubmit, control, errors } = useForm<AddServiceFormData>({
+  const { handleSubmit, control, errors, watch } = useForm<AddServiceFormData>({
     defaultValues,
     resolver,
   });
 
+  const watchUserClaims = watch('requiredUserClaims');
+  const watchBusinessClaims = watch('requiredBusinessClaims');
+
   const handleClick = useCallback(
     (data: AddServiceFormData) => {
-      const { validityPeriods, requiredBusinessClaims, requiredUserClaims, ...rest } = data;
+      const { validityPeriods, ...rest } = data;
       const newService = {
         ...rest,
         validityPeriods: validityPeriods
-          .filter((p) => p.to && p.from)
-          .map((p) => ({ to: p.to?.unix() || 0, from: p.from?.unix() || 0 })),
-        requiredUserClaims: requiredUserClaims.map((item) => item.claim),
-        requiredBusinessClaims: requiredBusinessClaims.map((item) => item.claim),
+          ?.filter((p) => p.to && p.from)
+          ?.map((p) => ({ to: p.to?.unix() || 0, from: p.from?.unix() || 0 })),
       };
       onSubmit(newService);
-      onClose();
     },
-    [onClose, onSubmit],
+    [onSubmit],
   );
 
   if (!open) {
@@ -123,6 +151,20 @@ function AddVehicleModal({ open, onClose, className, onSubmit, ...rest }: BaseMo
         <CardHeader title="Add service" />
         <Divider />
         <CardContent>
+          <Controller
+            as={TextField}
+            type="number"
+            InputProps={{ inputProps: { min: 0 } }}
+            name="packageId"
+            label="Package ID"
+            margin="normal"
+            variant="outlined"
+            size="small"
+            fullWidth
+            control={control}
+            error={Boolean(errors?.packageId)}
+            helperText={errors?.packageId?.message}
+          />
           <Controller
             as={TextField}
             name="packageName"
@@ -190,16 +232,58 @@ function AddVehicleModal({ open, onClose, className, onSubmit, ...rest }: BaseMo
             error={Boolean(errors?.termsConditions)}
             helperText={errors?.termsConditions?.message}
           />
+          <FormControl className={classes.formControl}>
+            <InputLabel id="requiredUserClaims-label">User claims</InputLabel>
+            <Controller
+              control={control}
+              as={
+                <Select>
+                  {userClaims.map((claim) => (
+                    <MenuItem key={claim} value={claim}>
+                      <Checkbox checked={watchUserClaims?.indexOf(claim) > -1} />
+                      <ListItemText primary={claim} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              }
+              name="requiredUserClaims"
+              labelId="requiredUserClaims-label"
+              id="requiredUserClaims"
+              multiple
+              renderValue={(selected: string[]) => selected.join(', ')}
+              input={<Input />}
+            />
+          </FormControl>
+          <FormControl className={classes.formControl}>
+            <InputLabel id="requiredBusinessClaims-label">Business claims</InputLabel>
+            <Controller
+              control={control}
+              as={
+                <Select>
+                  {businessClaims.map((claim) => (
+                    <MenuItem key={claim} value={claim}>
+                      <Checkbox checked={watchBusinessClaims?.indexOf(claim) > -1} />
+                      <ListItemText primary={claim} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              }
+              name="requiredBusinessClaims"
+              labelId="requiredBusinessClaims-label"
+              id="requiredBusinessClaims"
+              multiple
+              renderValue={(selected: string[]) => selected.join(', ')}
+              input={<Input />}
+            />
+          </FormControl>
           <ValidityPeriods control={control} />
-          <Claims control={control} name="requiredUserClaims" heading="Required User Claims" />
-          <Claims control={control} name="requiredBusinessClaims" heading="Required Business Claims" />
         </CardContent>
         <Divider />
         <CardActions className={classes.actions}>
-          <Button onClick={onClose}>Dismiss</Button>
-          <Button color="primary" onClick={handleSubmit(handleClick)} variant="contained">
-            Confirm
-          </Button>
+          <Button onClick={onClose}>Cancel</Button>
+          <LoadingButton pending={loading} color="primary" onClick={handleSubmit(handleClick)} variant="contained">
+            Add
+          </LoadingButton>
         </CardActions>
       </Card>
     </Modal>

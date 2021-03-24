@@ -47,6 +47,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   logoutIcon: {
     marginRight: theme.spacing(1),
   },
+  logo: {
+    objectFit: 'cover',
+  },
 }));
 
 interface TopBarProps extends AppBarProps {
@@ -66,7 +69,7 @@ function TopBar({ className, ...rest }: TopBarProps) {
     >
       <Toolbar>
         <RouterLink to="/">
-          <img width={143} height={36} alt="Logo" src="/static/img/logo.png" />
+          <img className={classes.logo} width={143} height={36} alt="Logo" src="/static/img/logo.png" />
         </RouterLink>
       </Toolbar>
     </AppBar>

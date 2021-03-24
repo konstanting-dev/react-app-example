@@ -1,5 +1,8 @@
 import React, { useCallback, useMemo } from 'react';
+import { useMutation } from 'react-query';
 import { Column } from 'react-table';
+
+import { Chip } from '@material-ui/core';
 
 import { addMemberRequest } from 'src/api/members';
 import { useMembersData } from 'src/providers/members';
@@ -13,6 +16,7 @@ import MembersListView from './View';
 function MembersTableContainer() {
   const { handleClose, handleOpen, open } = usePopup();
   const { members, addMember, isLoading } = useMembersData();
+  const { isLoading: addMemberLoading, mutateAsync } = useMutation('addMember', addMemberRequest);
 
   const columns: Column<Member>[] = useMemo(
     () => [
@@ -26,10 +30,17 @@ function MembersTableContainer() {
       },
       {
         Header: 'role',
-        accessor: 'role',
-      },
-      {
-        accessor: 'id',
+        accessor: 'roles',
+        // eslint-disable-next-line react/display-name
+        Cell: ({ value }) => {
+          return (
+            <>
+              {value?.map((role) => (
+                <Chip key={role} label={role} />
+              ))}
+            </>
+          );
+        },
       },
     ],
     [],
@@ -40,19 +51,19 @@ function MembersTableContainer() {
       const newMember = {
         ...data,
       };
-      const response = await addMemberRequest(newMember);
+      await mutateAsync(newMember);
       addMember({
         ...newMember,
-        id: response.id,
       });
+      handleClose();
     },
-    [addMember],
+    [addMember, handleClose, mutateAsync],
   );
 
   return (
     <>
       <MembersListView data={members} columns={columns} handleAddMemberClick={handleOpen} loading={isLoading} />
-      <AddMemberModal open={open} onClose={handleClose} onSubmit={handleSubmit} />
+      <AddMemberModal open={open} onClose={handleClose} onSubmit={handleSubmit} loading={addMemberLoading} />
     </>
   );
 }

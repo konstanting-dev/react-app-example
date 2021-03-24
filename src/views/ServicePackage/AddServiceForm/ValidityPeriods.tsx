@@ -8,7 +8,7 @@ import { makeStyles } from '@material-ui/styles';
 
 import { AddServiceFormData } from 'src/views/ServicePackage/AddServiceForm/types';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: {
     margin: '20px 0',
   },

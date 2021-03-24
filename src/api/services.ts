@@ -1,27 +1,29 @@
-import { NewService, Service } from 'src/providers/services/types';
-import { ID } from 'src/utils/string';
+import api from 'src/api/apiService';
+import { Service } from 'src/providers/services/types';
 
-const SERVICES_STORAGE_KEY = 'services';
-
-export const getServices = () => {
-  return Promise.resolve(JSON.parse(localStorage.getItem(SERVICES_STORAGE_KEY) || '[]') as Service[]);
+/**
+ * Axios request to get the list of all service packages
+ * @returns { Promise<Service[]> } - Service array promise
+ */
+export const getServices = async () => {
+  const { data } = await api.get<Service[]>('/service-packages');
+  return data;
 };
 
-export const addServiceRequest = (data: NewService) => {
-  const id = ID();
-  const services = JSON.parse(localStorage.getItem(SERVICES_STORAGE_KEY) || '[]') as Service[];
-  const newService = {
-    packageId: id,
-    ...data,
-  };
-  localStorage.setItem(SERVICES_STORAGE_KEY, JSON.stringify([...services, newService]));
-  return Promise.resolve(newService);
+/**
+ * Axios request to add a new service package
+ * @param { Service } data
+ * @returns { Promise<AxiosResponse<any>> }
+ */
+export const addServiceRequest = (data: Service) => {
+  return api.post('/service-packages', data);
 };
 
+/**
+ * Axios request to delete a service package
+ * @param {string} packageId
+ * @returns { Promise<AxiosResponse<any>> }
+ */
 export const deleteServiceRequest = (packageId: string) => {
-  const services = JSON.parse(localStorage.getItem(SERVICES_STORAGE_KEY) || '[]') as Service[];
-
-  return Promise.resolve(
-    localStorage.setItem(SERVICES_STORAGE_KEY, JSON.stringify(services.filter((m) => m.packageId !== packageId))),
-  );
+  return api.delete(`/service-packages/${packageId}`);
 };

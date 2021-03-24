@@ -15,8 +15,6 @@ export interface Service {
   requiredBusinessClaims: string[];
 }
 
-export type NewService = Omit<Service, 'packageId'>;
-
 export interface ServicesContextType {
   services: Service[];
   addService: (newService: Service) => void;
