@@ -1,5 +1,4 @@
 import React from 'react';
-import { HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { renderRoutes } from 'react-router-config';
 import { Router } from 'react-router-dom';
@@ -19,6 +18,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       cacheTime: 0,
+      refetchOnWindowFocus: false,
     },
   },
 });
@@ -29,9 +29,7 @@ const App: React.FC = () => {
       <LocalizationProvider dateLibInstance={moment} dateAdapter={MomentAdapter}>
         <QueryClientProvider client={queryClient}>
           <SnackbarProvider>
-            <HelmetProvider>
-              <Router history={history}>{renderRoutes(routes)}</Router>
-            </HelmetProvider>
+            <Router history={history}>{renderRoutes(routes)}</Router>
           </SnackbarProvider>
         </QueryClientProvider>
       </LocalizationProvider>
