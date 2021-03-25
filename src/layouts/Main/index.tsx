@@ -1,8 +1,7 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { RouteProps } from 'react-router';
 import { renderRoutes, RouteConfig } from 'react-router-config';
 
-import LinearProgress from '@material-ui/core/LinearProgress';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 
 import OnboardingStepper from 'src/layouts/Main/Stepper';
@@ -41,9 +40,7 @@ function MainPage({ route }: DashboardProps) {
       <TopBar />
       <div className={classes.container}>
         <div className={classes.content}>
-          <Suspense fallback={<LinearProgress />}>
-            <OnboardingStepper>{route && renderRoutes(route.routes)}</OnboardingStepper>
-          </Suspense>
+          <OnboardingStepper>{route && renderRoutes(route.routes)}</OnboardingStepper>
         </div>
       </div>
     </>

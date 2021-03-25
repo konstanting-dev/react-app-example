@@ -1,8 +1,9 @@
-import React, { PropsWithChildren, useEffect } from 'react';
+import React, { PropsWithChildren, Suspense, useEffect } from 'react';
 import { useHistory } from 'react-router';
 import { useLocation } from 'react-router-dom';
 
 import Button from '@material-ui/core/Button';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import Step from '@material-ui/core/Step';
 import StepButton from '@material-ui/core/StepButton';
 import Stepper from '@material-ui/core/Stepper';
@@ -40,7 +41,14 @@ const useStyles = makeStyles((theme: Theme) =>
       marginBottom: theme.spacing(1),
     },
     content: {
+      position: 'relative',
       padding: 80,
+    },
+    progress: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
     },
   }),
 );
@@ -144,7 +152,7 @@ export default function OnboardingStepper({ children }: PropsWithChildren<unknow
         })}
       </Stepper>
       <div className={classes.content}>
-        {children}
+        <Suspense fallback={<LinearProgress className={classes.progress} />}>{children}</Suspense>
         <div>
           <Button disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
             Back
