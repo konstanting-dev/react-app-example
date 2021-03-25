@@ -2,9 +2,8 @@ import React, { useCallback, useMemo } from 'react';
 import { useMutation } from 'react-query';
 import { Column } from 'react-table';
 
-import { Chip } from '@material-ui/core';
-
 import { addMemberRequest } from 'src/api/members';
+import Chips from 'src/components/Chips';
 import { useMembersData } from 'src/providers/members';
 import { Member } from 'src/providers/members/types';
 import usePopup from 'src/utils/hooks/usePopup';
@@ -33,13 +32,7 @@ function MembersTableContainer() {
         accessor: 'roles',
         // eslint-disable-next-line react/display-name
         Cell: ({ value }) => {
-          return (
-            <>
-              {value?.map((role) => (
-                <Chip key={role} label={role} />
-              ))}
-            </>
-          );
+          return <Chips values={value} />;
         },
       },
     ],

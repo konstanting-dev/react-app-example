@@ -3,6 +3,7 @@ import { useMutation } from 'react-query';
 import { Column } from 'react-table';
 
 import { addServiceRequest } from 'src/api/services';
+import Chips from 'src/components/Chips';
 import { useServicesData } from 'src/providers/services';
 import { Service } from 'src/providers/services/types';
 import usePopup from 'src/utils/hooks/usePopup';
@@ -33,6 +34,22 @@ function ServicesTableContainer() {
       {
         Header: 'Price per kilometer',
         accessor: 'pricePerKm',
+      },
+      {
+        Header: 'User claims',
+        accessor: 'requiredUserClaims',
+        // eslint-disable-next-line react/display-name
+        Cell: ({ value }) => {
+          return <Chips values={value} />;
+        },
+      },
+      {
+        Header: 'Business claims',
+        accessor: 'requiredBusinessClaims',
+        // eslint-disable-next-line react/display-name
+        Cell: ({ value }) => {
+          return <Chips values={value} />;
+        },
       },
       {
         accessor: 'packageId',
