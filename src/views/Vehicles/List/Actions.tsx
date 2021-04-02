@@ -1,11 +1,12 @@
 import React, { memo, useCallback } from 'react';
-import { useMutation } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 
 import { IconButton, TableCell, Tooltip } from '@material-ui/core';
 import { Delete as DeleteIcon } from '@material-ui/icons';
 
 import { deleteVehicleRequest } from 'src/api/vehicles';
 import ConfirmationDialog from 'src/components/ConfirmationDialog';
+import { Vehicle } from 'src/providers/vehicles/types';
 import usePopup from 'src/utils/hooks/usePopup';
 
 interface AccountsListActionsProps {
@@ -15,8 +16,16 @@ interface AccountsListActionsProps {
 }
 
 function Actions({ id, className, onDelete }: AccountsListActionsProps) {
+  const queryClient = useQueryClient();
   const { handleOpen, handleClose, open } = usePopup();
-  const { isLoading: deleteVehicleLoading, mutateAsync } = useMutation('deleteVehicle', deleteVehicleRequest);
+  const { isLoading: deleteVehicleLoading, mutateAsync } = useMutation('deleteVehicle', deleteVehicleRequest, {
+    onSuccess: (data) => {
+      queryClient.setQueryData<Vehicle[]>(
+        ['vehicles'],
+        (prevVehicles) => prevVehicles?.filter((v) => v.vin !== data.vin) || [],
+      );
+    },
+  });
 
   const handleDelete = useCallback(async () => {
     await mutateAsync(id);

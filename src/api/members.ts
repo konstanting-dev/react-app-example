@@ -16,8 +16,9 @@ export const getMembers = async () => {
  * @param { Member } data
  * @returns { Promise<AxiosResponse<any>> }
  */
-export const addMemberRequest = (data: Member) => {
-  return api.post('/users', data);
+export const addMemberRequest = async (data: Member) => {
+  await api.post('/users', data);
+  return data;
 };
 
 /**
@@ -25,6 +26,9 @@ export const addMemberRequest = (data: Member) => {
  * @param {string} email
  * @returns { Promise<AxiosResponse<any>> }
  */
-export const deleteMemberRequest = (email: string) => {
-  return api.delete(`/users/${email}`);
+export const deleteMemberRequest = async (email: string) => {
+  await api.delete(`/users/${email}`);
+  return {
+    email,
+  };
 };

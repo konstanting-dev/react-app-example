@@ -1,11 +1,12 @@
 import React, { memo, useCallback } from 'react';
-import { useMutation } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 
 import { IconButton, TableCell, Tooltip } from '@material-ui/core';
 import { Delete as DeleteIcon } from '@material-ui/icons';
 
 import { deleteMemberRequest } from 'src/api/members';
 import ConfirmationDialog from 'src/components/ConfirmationDialog';
+import { Member } from 'src/providers/members/types';
 import usePopup from 'src/utils/hooks/usePopup';
 
 interface AccountsListActionsProps {
@@ -15,8 +16,16 @@ interface AccountsListActionsProps {
 }
 
 function Actions({ onDelete, id, className }: AccountsListActionsProps) {
+  const queryClient = useQueryClient();
   const { handleOpen, handleClose, open } = usePopup();
-  const { isLoading: deleteMemberLoading, mutateAsync } = useMutation('deleteMember', deleteMemberRequest);
+  const { isLoading: deleteMemberLoading, mutateAsync } = useMutation('deleteMember', deleteMemberRequest, {
+    onSuccess: (data) => {
+      queryClient.setQueryData<Member[]>(
+        ['members'],
+        (prevMembers) => prevMembers?.filter((m) => m.email !== data.email) || [],
+      );
+    },
+  });
 
   const handleDelete = useCallback(async () => {
     await mutateAsync(id);

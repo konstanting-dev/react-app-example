@@ -13,17 +13,21 @@ export const getServices = async () => {
 /**
  * Axios request to add a new service package
  * @param { Service } data
- * @returns { Promise<AxiosResponse<any>> }
+ * @returns { Promise<Service> }
  */
-export const addServiceRequest = (data: Service) => {
-  return api.post('/service-packages', data);
+export const addServiceRequest = async (data: Service) => {
+  await api.post('/service-packages', data);
+  return data;
 };
 
 /**
  * Axios request to delete a service package
  * @param {string} packageId
- * @returns { Promise<AxiosResponse<any>> }
+ * @returns { Promise<{ packageId }> }
  */
-export const deleteServiceRequest = (packageId: string) => {
-  return api.delete(`/service-packages/${packageId}`);
+export const deleteServiceRequest = async (packageId: string) => {
+  await api.delete(`/service-packages/${packageId}`);
+  return {
+    packageId,
+  };
 };

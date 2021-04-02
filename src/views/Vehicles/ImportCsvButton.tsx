@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useCallback, useRef, useState } from 'react';
-import { useMutation } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 
 import { Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
@@ -7,7 +7,6 @@ import clsx from 'clsx';
 
 import { addVehiclesBulkRequest } from 'src/api/vehicles';
 import LoadingButton from 'src/components/LoadingButton';
-import { useVehiclesData } from 'src/providers/vehicles';
 import { Vehicle } from 'src/providers/vehicles/types';
 import { parse } from 'src/utils/csvParser';
 
@@ -26,20 +25,23 @@ interface ImportCsvInputProps {
 }
 
 function ImportCsvButton({ className }: ImportCsvInputProps) {
+  const queryClient = useQueryClient();
   const classes = useStyles();
   const inputFile = useRef<HTMLInputElement | null>(null);
-  const { addVehicle } = useVehiclesData();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { isLoading: addVehicleImportLoading, mutateAsync } = useMutation('addVehicleImport', addVehiclesBulkRequest);
+  const { isLoading: addVehicleImportLoading, mutateAsync } = useMutation('addVehicleImport', addVehiclesBulkRequest, {
+    onSuccess: (data) => {
+      queryClient.setQueryData<Vehicle[]>(['vehicles'], (prevVehicles) => [...(prevVehicles || []), ...data]);
+    },
+  });
 
   const handleParse = useCallback(
     async (data: Vehicle[]) => {
       if (data.length) {
         await mutateAsync(data);
-        addVehicle(data);
       }
     },
-    [addVehicle, mutateAsync],
+    [mutateAsync],
   );
 
   const handleFileChange = useCallback(

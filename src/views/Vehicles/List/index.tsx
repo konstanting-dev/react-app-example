@@ -1,12 +1,11 @@
 import React, { useCallback, useMemo } from 'react';
-import { useMutation } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { Column } from 'react-table';
 
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { addVehicleRequest } from 'src/api/vehicles';
-import { useVehiclesData } from 'src/providers/vehicles';
+import { addVehicleRequest, getVehicles } from 'src/api/vehicles';
 import { Vehicle } from 'src/providers/vehicles/types';
 import usePopup from 'src/utils/hooks/usePopup';
 import ImportCsvButton from 'src/views/Vehicles/ImportCsvButton';
@@ -26,9 +25,14 @@ const useStyles = makeStyles(() => ({
 
 function VehiclesTableContainer() {
   const classes = useStyles();
+  const queryClient = useQueryClient();
+  const { isLoading, data } = useQuery('vehicles', getVehicles);
   const { handleClose, handleOpen, open } = usePopup();
-  const { vehicles, addVehicle, isLoading } = useVehiclesData();
-  const { isLoading: addVehicleLoading, mutateAsync } = useMutation('addVehicle', addVehicleRequest);
+  const { isLoading: addVehicleLoading, mutateAsync } = useMutation('addVehicle', addVehicleRequest, {
+    onSuccess: (data) => {
+      queryClient.setQueryData<Vehicle[]>(['vehicles'], (prevVehicles) => [...(prevVehicles || []), data]);
+    },
+  });
 
   const columns: Column<Vehicle>[] = useMemo(
     () => [
@@ -75,10 +79,9 @@ function VehiclesTableContainer() {
   const handleSubmit = useCallback(
     async (data: Vehicle) => {
       await mutateAsync(data);
-      addVehicle(data);
       handleClose();
     },
-    [addVehicle, handleClose, mutateAsync],
+    [handleClose, mutateAsync],
   );
 
   return (
@@ -89,7 +92,7 @@ function VehiclesTableContainer() {
         </Button>
         <ImportCsvButton className={classes.addButton} />
       </div>
-      <VehiclesListView data={vehicles} columns={columns} loading={isLoading} />
+      <VehiclesListView data={data || []} columns={columns} loading={isLoading} />
       <AddVehicleForm open={open} onClose={handleClose} onSubmit={handleSubmit} loading={addVehicleLoading} />
     </>
   );

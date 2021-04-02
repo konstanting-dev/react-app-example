@@ -17,8 +17,10 @@ import history from './utils/history';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      cacheTime: 0,
+      cacheTime: Infinity,
+      staleTime: Infinity,
       refetchOnWindowFocus: false,
+      refetchOnMount: false,
     },
   },
 });

@@ -13,26 +13,31 @@ export const getVehicles = async () => {
 /**
  * Axios request to add a new vehicle
  * @param { Vehicle } data
- * @returns { Promise<AxiosResponse<any>> }
+ * @returns { Promise<Vehicle> }
  */
-export const addVehicleRequest = (data: Vehicle) => {
-  return api.post('/vehicles', data);
+export const addVehicleRequest = async (data: Vehicle) => {
+  await api.post('/vehicles', data);
+  return data;
 };
 
 /**
  * Axios request to bulk import new vehicles
  * @param { Vehicle[] } data
- * @returns { Promise<AxiosResponse<any>> }
+ * @returns { Promise<Vehicle[]> }
  */
-export const addVehiclesBulkRequest = (data: Vehicle[]) => {
-  return api.post('/vehicles/import', data);
+export const addVehiclesBulkRequest = async (data: Vehicle[]) => {
+  await api.post('/vehicles/import', data);
+  return data;
 };
 
 /**
  * Axios request to delete a vehicle
  * @param {string} vin
- * @returns { Promise<AxiosResponse<any>> }
+ * @returns { Promise<{ vin }> }
  */
-export const deleteVehicleRequest = (vin: string) => {
-  return api.delete(`/vehicles/${vin}`);
+export const deleteVehicleRequest = async (vin: string) => {
+  await api.delete(`/vehicles/${vin}`);
+  return {
+    vin,
+  };
 };

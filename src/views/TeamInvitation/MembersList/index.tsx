@@ -1,10 +1,9 @@
 import React, { useCallback, useMemo } from 'react';
-import { useMutation } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { Column } from 'react-table';
 
-import { addMemberRequest } from 'src/api/members';
+import { addMemberRequest, getMembers } from 'src/api/members';
 import Chips from 'src/components/Chips';
-import { useMembersData } from 'src/providers/members';
 import { Member } from 'src/providers/members/types';
 import usePopup from 'src/utils/hooks/usePopup';
 import AddMemberModal from 'src/views/TeamInvitation/AddMemberForm';
@@ -13,9 +12,14 @@ import { AddMemberFormData } from 'src/views/TeamInvitation/AddMemberForm/types'
 import MembersListView from './View';
 
 function MembersTableContainer() {
+  const queryClient = useQueryClient();
+  const { isLoading, data } = useQuery('members', getMembers);
   const { handleClose, handleOpen, open } = usePopup();
-  const { members, addMember, isLoading } = useMembersData();
-  const { isLoading: addMemberLoading, mutateAsync } = useMutation('addMember', addMemberRequest);
+  const { isLoading: addMemberLoading, mutateAsync } = useMutation('addMember', addMemberRequest, {
+    onSuccess: (data) => {
+      queryClient.setQueryData<Member[]>(['members'], (prevMembers) => [...(prevMembers || []), data]);
+    },
+  });
 
   const columns: Column<Member>[] = useMemo(
     () => [
@@ -45,17 +49,14 @@ function MembersTableContainer() {
         ...data,
       };
       await mutateAsync(newMember);
-      addMember({
-        ...newMember,
-      });
       handleClose();
     },
-    [addMember, handleClose, mutateAsync],
+    [handleClose, mutateAsync],
   );
 
   return (
     <>
-      <MembersListView data={members} columns={columns} handleAddMemberClick={handleOpen} loading={isLoading} />
+      <MembersListView data={data || []} columns={columns} handleAddMemberClick={handleOpen} loading={isLoading} />
       <AddMemberModal open={open} onClose={handleClose} onSubmit={handleSubmit} loading={addMemberLoading} />
     </>
   );

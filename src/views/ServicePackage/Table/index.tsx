@@ -1,10 +1,9 @@
 import React, { useCallback, useMemo } from 'react';
-import { useMutation } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { Column } from 'react-table';
 
-import { addServiceRequest } from 'src/api/services';
+import { addServiceRequest, getServices } from 'src/api/services';
 import Chips from 'src/components/Chips';
-import { useServicesData } from 'src/providers/services';
 import { Service } from 'src/providers/services/types';
 import usePopup from 'src/utils/hooks/usePopup';
 
@@ -13,9 +12,14 @@ import AddServiceForm from '../AddServiceForm';
 import ServicesListView from './View';
 
 function ServicesTableContainer() {
+  const queryClient = useQueryClient();
   const { handleClose, handleOpen, open } = usePopup();
-  const { services, addService, isLoading } = useServicesData();
-  const { isLoading: addServiceLoading, mutateAsync } = useMutation('addService', addServiceRequest);
+  const { isLoading, data } = useQuery('services', getServices);
+  const { isLoading: addServiceLoading, mutateAsync } = useMutation('addService', addServiceRequest, {
+    onSuccess: (data) => {
+      queryClient.setQueryData<Service[]>(['services'], (prevServices) => [...(prevServices || []), data]);
+    },
+  });
 
   const columns: Column<Service>[] = useMemo(
     () => [
@@ -61,15 +65,14 @@ function ServicesTableContainer() {
   const handleSubmit = useCallback(
     async (data: Service) => {
       await mutateAsync(data);
-      addService(data);
       handleClose();
     },
-    [addService, handleClose, mutateAsync],
+    [handleClose, mutateAsync],
   );
 
   return (
     <>
-      <ServicesListView data={services} columns={columns} handleAddServiceClick={handleOpen} loading={isLoading} />
+      <ServicesListView data={data || []} columns={columns} handleAddServiceClick={handleOpen} loading={isLoading} />
       <AddServiceForm open={open} onClose={handleClose} onSubmit={handleSubmit} loading={addServiceLoading} />
     </>
   );
