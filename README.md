@@ -1,5 +1,5 @@
-# fleet2share
-The fleet management portion of the bloXmove Mobility Blockchain Platform
+# Example of React application
+Application to view and to add data about Vehicles, Users and Service Packages.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
